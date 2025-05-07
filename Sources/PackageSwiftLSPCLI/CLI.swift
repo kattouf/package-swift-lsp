@@ -6,6 +6,7 @@ struct CLI: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "package-swift-lsp",
         abstract: "LSP server for Package.swift SPM manifest files",
+        version: cliVersion
     )
 
     func run() async throws {
