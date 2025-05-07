@@ -1,0 +1,12 @@
+{
+  "languages": {
+    "Swift": {
+      "formatter": {
+        "external": {
+          "command": "swiftformat",
+          "arguments": ["--stdinpath", "{buffer_path}"]
+        }
+      }
+    }
+  }
+}
