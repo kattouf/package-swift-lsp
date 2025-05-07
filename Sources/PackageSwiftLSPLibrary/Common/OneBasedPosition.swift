@@ -1,6 +1,6 @@
 import LanguageServerProtocol
 
-struct OneBasedPosition {
+struct OneBasedPosition: Equatable {
     let line: Int
     let column: Int
 
