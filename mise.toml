@@ -1,0 +1,9 @@
+[tools]
+"swiftformat" = "0.55.6"
+"xcbeautify" = "2.28.0"
+"gh" = "2.72.0"
+"git-cliff" = "2.8.0"
+
+[settings]
+exec_auto_install = false
+status.missing_tools = "never"
