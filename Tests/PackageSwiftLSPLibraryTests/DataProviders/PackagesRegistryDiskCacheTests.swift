@@ -5,8 +5,8 @@ import Testing
 struct PackagesRegistryDiskCacheTests {
     private func sut(expirationTime: TimeInterval) -> PackagesRegistryDiskCache {
         let packageListCacheDirectory = FileManager.default.temporaryDirectory
-        .appendingPathComponent(UUID().uuidString)
-        .appendingPathComponent("PackagesRegistryDiskCacheTests")
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathComponent("PackagesRegistryDiskCacheTests")
         try? FileManager.default.createDirectory(at: packageListCacheDirectory, withIntermediateDirectories: true)
         return .defaultDiskCache(storageDirectoryPath: packageListCacheDirectory, expirationTime: expirationTime)
     }

@@ -136,7 +136,7 @@ final class DocumentEventHandler {
 
         try await resolvedDependenciesProvider.resolveDependencies(for: document)
 
-        if let progressToken = progressToken {
+        if let progressToken {
             do {
                 try await progressTracker.stopTracking(progressToken)
             } catch {
