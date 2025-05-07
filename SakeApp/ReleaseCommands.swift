@@ -47,7 +47,7 @@ struct ReleaseCommands {
         @Argument(help: "Version number")
         var version: String
 
-        @Opriont(name: .shortAndLong, help: "Clean build artifacts before running")
+        @Option(name: .shortAndLong, help: "Clean build artifacts before running")
         var clean: Bool = false
 
         func validate() throws {
