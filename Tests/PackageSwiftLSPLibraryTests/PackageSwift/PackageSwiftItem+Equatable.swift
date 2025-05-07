@@ -21,6 +21,8 @@ extension PackageSwiftItem.NonEmptyFunctionArguments: Equatable {
 
 extension PackageSwiftItem.FunctionArgument: Equatable {
     public static func == (lhs: PackageSwiftItem.FunctionArgument, rhs: PackageSwiftItem.FunctionArgument) -> Bool {
-        lhs.label == rhs.label && lhs.stringValue == rhs.stringValue
+        lhs.label == rhs.label &&
+            lhs.stringValue == rhs.stringValue &&
+            lhs.stringValueRange == rhs.stringValueRange
     }
 }
