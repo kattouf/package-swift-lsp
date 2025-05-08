@@ -80,7 +80,7 @@ struct ReleaseCommands {
                 try arguments.validate()
 
                 let version = arguments.version
-                let versionFilePath = "\(context.projectRoot)/Sources/PackageSwiftCLILSP/Version.swift"
+                let versionFilePath = "\(context.projectRoot)/Sources/PackageSwiftLSPCLI/Version.swift"
                 let currentVersion = try String(contentsOfFile: versionFilePath)
                     .split(separator: "\"")[1]
                 if currentVersion == version {
