@@ -2,6 +2,8 @@
 
 A Language Server Protocol (LSP) implementation for Swift Package Manager's Package.swift manifest files.
 
+![demo](https://github.com/user-attachments/assets/4caa7126-a2d7-45dd-b663-2d3f31817f74)
+
 ## Overview
 
 Server provides intelligent features for working with Package.swift files in various code editors. It enhances your development experience by offering:
