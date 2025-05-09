@@ -9,6 +9,14 @@ Server provides intelligent features for working with Package.swift files in var
 - Code completion for Package.swift manifest files
 - Hover information for SPM declarations and syntax elements
 
+## Installation
+
+Installation instructions are currently in progress. Stay tuned for detailed setup guides.
+
+## Editor Integration
+
+Editor integration guides for popular IDEs and text editors are currently being developed. Support for various editors (Zed, VSCode, Vim, Emacs, etc.) will be available soon.
+
 ## License
 
 Server is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
