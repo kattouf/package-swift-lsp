@@ -18,9 +18,7 @@ jobs:
           swift-version: 6.1
       - uses: kattouf/setup-sake@v1
       - name: Run tests
-        run: |
-          sake print_swift_version
-          sake test
+        run: sake test
   lint:
     runs-on: macos-latest
     steps:
