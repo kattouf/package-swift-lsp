@@ -36,7 +36,7 @@ let package = Package(
                 .product(name: "LanguageServer", package: "LanguageServer"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
-                .product(name: "SwiftPMDataModel", package: "swift-package-manager"),
+                .product(name: "SwiftPMDataModel-auto", package: "swift-package-manager"),
                 .product(name: "Subprocess", package: "swift-subprocess"),
                 .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
                 .product(name: "Logging", package: "swift-log"),
