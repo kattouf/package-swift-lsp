@@ -7,6 +7,7 @@ import Testing
 struct PackagesSwiftResolverTests {
     @Test(arguments: ["6.0.0", "5.10.0"])
     func resolveDependencies(toolsVersion: String) async throws {
+        Issue.record("jepa")
         let dependencies: [(url: String, exactVersion: String)] = [
             ("https://github.com/Alamofire/Alamofire", "5.9.0"),
             ("https://github.com/apple/swift-log", "1.5.2"),
