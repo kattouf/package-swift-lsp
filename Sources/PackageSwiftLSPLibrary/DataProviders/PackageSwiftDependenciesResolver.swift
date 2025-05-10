@@ -20,6 +20,7 @@ final class PackageSwiftDependenciesResolver: Sendable {
         let localFileSystem = Basics.localFileSystem
 
         var location = try Workspace.Location(forRootPackage: rootPackagePath, fileSystem: localFileSystem)
+        // FIXME: use Workspace.DefaultLocations
         location.scratchDirectory = location.scratchDirectory.appending(component: "package-swift-lsp")
         location.resolvedVersionsFile = location.scratchDirectory
             .appending(component: "Package\(cacheKey.map { "-\($0)" } ?? "").resolved")

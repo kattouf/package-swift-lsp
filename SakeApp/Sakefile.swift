@@ -21,7 +21,7 @@ struct Commands: SakeApp {
             dependencies: [MiseCommands.ensureSwiftFormatInstalled],
             run: { context in
                 try runAndPrint(
-                    "mise",
+                    MiseCommands.miseBin(context),
                     "exec",
                     "--",
                     "swiftformat",
@@ -41,7 +41,7 @@ struct Commands: SakeApp {
             dependencies: [MiseCommands.ensureSwiftFormatInstalled],
             run: { context in
                 try runAndPrint(
-                    "mise",
+                    MiseCommands.miseBin(context),
                     "exec",
                     "--",
                     "swiftformat",

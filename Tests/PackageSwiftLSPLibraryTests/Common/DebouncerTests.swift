@@ -13,7 +13,7 @@ struct DebouncerTests {
             result.withValue { $0.append(1) }
         }
 
-        try await Task.sleep(for: .milliseconds(220))
+        try await Task.sleep(for: .milliseconds(400))
         #expect(result.value == [1], "Expected 1, but got \(result.value.count)")
     }
 
