@@ -1,13 +1,13 @@
 {
-  "originHash" : "209e6a0f1eff1632a4c5b2ee679a6c10b890e8ab13663dbc54061d88b5b5b04e",
+  "originHash" : "57e6572674810311538bb83fcda56f3982e1115d52fb7021c59d3286bdd2b1c6",
   "pins" : [
     {
       "identity" : "jsonrpc",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ChimeHQ/JSONRPC",
       "state" : {
-        "revision" : "29987f721374f30e686af40ccffd0b13b14dde1f",
-        "version" : "0.9.2"
+        "revision" : "56c936de4e4385287dc18f260557dbdf443a55bd",
+        "version" : "0.9.1"
       }
     },
     {
@@ -123,7 +123,7 @@
       "location" : "https://github.com/swiftlang/swift-subprocess.git",
       "state" : {
         "branch" : "main",
-        "revision" : "abd34bae702910c8f24dcea4ab8fb51d017d2255"
+        "revision" : "161289640050592879e86656e90f35d04cf048f5"
       }
     },
     {
