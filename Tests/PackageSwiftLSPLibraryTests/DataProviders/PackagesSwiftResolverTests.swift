@@ -8,8 +8,8 @@ struct PackagesSwiftResolverTests {
     @Test(arguments: ["6.0.0", "5.10.0"])
     func resolveDependencies(toolsVersion: String) async throws {
         let dependencies: [(url: String, exactVersion: String)] = [
-            ("https://github.com/Alamofire/Alamofire", "5.10.2"),
-            ("https://github.com/apple/swift-log", "1.6.3"),
+            ("https://github.com/Alamofire/Alamofire", "5.9.0"),
+            ("https://github.com/apple/swift-log", "1.5.2"),
         ]
         let packagePath = try TestWorkspaceGenerator.generateSwiftPackageInTemporaryDirectory(
             toolsVersion: toolsVersion,
