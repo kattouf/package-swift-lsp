@@ -300,7 +300,7 @@ struct ReleaseCommands {
                 let version = arguments.version
                 let releaseNotesPath = context.projectRoot + "/" + releaseNotesPath(version: version)
                 try runAndPrint(
-                    "mise",
+                    MiseCommands.miseBin(context),
                     "exec",
                     "--",
                     "git",
