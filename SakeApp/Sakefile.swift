@@ -15,6 +15,18 @@ struct Commands: SakeApp {
         )
     }
 
+    public static var printSwiftVersion: Command {
+        Command(
+            description: "Print the Swift version",
+            run: { _ in
+                try runAndPrint(
+                    "swift",
+                    "--version"
+                )
+            }
+        )
+    }
+
     public static var lint: Command {
         Command(
             description: "Lint code",
