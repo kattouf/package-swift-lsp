@@ -10,10 +10,21 @@ A Language Server Protocol (LSP) implementation for Swift Package Manager's Pack
 
 ## Overview
 
-Server provides intelligent features for working with Package.swift files in various code editors. It enhances your development experience by offering:
+Language server for Package.swift files that provides:
 
-- Code completion for Package.swift manifest files
-- Hover information for SPM declarations and syntax elements
+- Smart code completion for Package.swift manifest files:
+  - In `.package(...)` function:
+    - `url:` argument with GitHub repository suggestions
+    - `from:` and `exact:` arguments with version suggestions
+    - `branch:` argument with available branch names
+  - In `.product(...)` function:
+    - `name:` argument with available product suggestions from dependencies
+    - `package:` argument with package name suggestions
+
+  > **Note:** After editing package dependencies (`.package(...)`), save the file for changes to be reflected in target completions.
+- Contextual hover information:
+  - Package details including location and state when hovering over package names
+  - Available products in the package
 
 ## Installation
 
@@ -22,6 +33,18 @@ Installation instructions are currently in progress. Stay tuned for detailed set
 ## Editor Integration
 
 Editor integration guides for popular IDEs and text editors are currently being developed. Support for various editors (Zed, VSCode, Vim, Emacs, etc.) will be available soon.
+
+## Acknowledgements
+
+Thanks to the people and projects that helped make this LSP possible:
+
+- [@mattmassicotte](https://github.com/mattmassicotte) for [ChimeHQ/LanguageServerProtocol](https://github.com/ChimeHQ/LanguageServerProtocol) - a solid foundation for this project
+- [Swift Package Index](https://swiftpackageindex.com/) - for providing great package data for our URL completions
+
+## Contributing
+
+- Feel free to submit feature requests if you have ideas for improving Package.swift editing experience
+- For substantial contributions (beyond small fixes), please open a discussion first to align on direction and implementation approach
 
 ## License
 
