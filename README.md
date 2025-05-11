@@ -1,5 +1,7 @@
 # Package.swift LSP
 
+![](https://img.shields.io/badge/Platform-macOS-6464aa)
+[![Latest Release](https://img.shields.io/github/release/kattouf/ProgressLine.svg)](https://github.com/kattouf/ProgressLine/releases/latest)
 [![codecov](https://codecov.io/gh/kattouf/package-swift-lsp/graph/badge.svg?token=ZV3UW5KJ6U)](https://codecov.io/gh/kattouf/package-swift-lsp)
 
 A Language Server Protocol (LSP) implementation for Swift Package Manager's Package.swift manifest files.
