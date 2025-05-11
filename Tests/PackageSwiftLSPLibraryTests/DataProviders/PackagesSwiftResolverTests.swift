@@ -5,7 +5,7 @@ import Testing
 
 @Suite(.serialized)
 struct PackagesSwiftResolverTests {
-    @Test(arguments: ["6.0.0", "5.10.0"])
+    @Test(arguments: ["6.0", "5.10"])
     func resolveDependencies(toolsVersion: String) async throws {
         let dependencies: [(url: String, exactVersion: String)] = [
             ("https://github.com/Alamofire/Alamofire", "5.10.2"),

@@ -37,8 +37,8 @@ struct ReleaseCommands {
         static let buildTargets: [BuildTarget] = [
             .init(arch: .arm, os: .macos),
             .init(arch: .x86, os: .macos),
-            //.init(arch: .x86, os: .linux),
-            //.init(arch: .arm, os: .linux),
+            // .init(arch: .x86, os: .linux),
+            // .init(arch: .arm, os: .linux),
         ]
         static let executableName = "package-swift-lsp"
     }
@@ -300,7 +300,7 @@ struct ReleaseCommands {
                 let version = arguments.version
                 let releaseNotesPath = context.projectRoot + "/" + releaseNotesPath(version: version)
                 try runAndPrint(
-                    "mise",
+                    MiseCommands.miseBin(context),
                     "exec",
                     "--",
                     "git",
