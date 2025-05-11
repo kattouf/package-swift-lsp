@@ -13,8 +13,7 @@ struct TestCommands {
                 let isGithubActions = context.environment["GITHUB_ACTIONS"] == "true"
                 let xcbeautifyRenderer = isGithubActions ? "github-actions" : "terminal"
                 try interruptableRunAndPrint(
-                    bash: "set -o pipefail && swift test --filter PackagesSwiftResolverTests",
-                    //bash: "set -o pipefail && swift test | \(MiseCommands.miseBin(context)) exec -- xcbeautify --disable-logging --renderer \(xcbeautifyRenderer)",
+                    bash: "set -o pipefail && swift test | \(MiseCommands.miseBin(context)) exec -- xcbeautify --disable-logging --renderer \(xcbeautifyRenderer)",
                     interruptionHandler: context.interruptionHandler
                 )
             }
