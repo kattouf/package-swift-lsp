@@ -1,5 +1,7 @@
 # Package.swift LSP
 
+[![codecov](https://codecov.io/gh/kattouf/package-swift-lsp/graph/badge.svg?token=ZV3UW5KJ6U)](https://codecov.io/gh/kattouf/package-swift-lsp)
+
 A Language Server Protocol (LSP) implementation for Swift Package Manager's Package.swift manifest files.
 
 ![demo](https://github.com/user-attachments/assets/4caa7126-a2d7-45dd-b663-2d3f31817f74)
