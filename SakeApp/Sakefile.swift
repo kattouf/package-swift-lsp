@@ -25,10 +25,7 @@ struct Commands: SakeApp {
                     "exec",
                     "--",
                     "swiftformat",
-                    "\(context.projectRoot)/Sources",
-                    "\(context.projectRoot)/SakeApp",
-                    "\(context.projectRoot)/Tests",
-                    "\(context.projectRoot)/Package.swift",
+                    swiftformatArgs(for: context),
                     "--lint"
                 )
             }
@@ -45,18 +42,21 @@ struct Commands: SakeApp {
                     "exec",
                     "--",
                     "swiftformat",
-                    "\(context.projectRoot)/Sources",
-                    "\(context.projectRoot)/SakeApp",
-                    "\(context.projectRoot)/Tests",
-                    "\(context.projectRoot)/Package.swift"
+                    swiftformatArgs(for: context)
                 )
             }
         )
     }
 }
 
-extension Command.Context {
-    var projectRoot: String {
-        "\(appDirectory)/.."
+private extension Commands {
+    private static func swiftformatArgs(for context: Command.Context) -> [String] {
+        [
+            "\(context.projectRoot)/Sources",
+            "\(context.projectRoot)/SakeApp",
+            "\(context.projectRoot)/Tests",
+            "\(context.projectRoot)/Package.swift",
+        ]
+            + (context.environment["GITHUB_ACTIONS"] == "true" ? ["--reporter", "github-actions-log"] : [])
     }
 }
