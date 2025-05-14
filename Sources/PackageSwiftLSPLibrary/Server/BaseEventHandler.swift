@@ -10,6 +10,7 @@ final class BaseEventHandler {
         logger.debug("Received initialize request")
         var serverCapabilities = ServerCapabilities()
         let textDocumentSync = TextDocumentSyncOptions(
+            openClose: true,
             change: .full,
             save: .optionA(true)
         )
