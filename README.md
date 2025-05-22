@@ -22,7 +22,8 @@ Language server for Package.swift files that provides:
     - `name:` argument with available product suggestions from dependencies
     - `package:` argument with package name suggestions
 
-  > **Note:** After editing package dependencies (`.package(...)`), save the file for changes to be reflected in target completions.
+  > [!NOTE]
+  > After editing package dependencies (`.package(...)`), save the file for changes to be reflected in target completions.
 - Contextual hover information:
   - Package details including location and state when hovering over package names
   - Available products in the package
