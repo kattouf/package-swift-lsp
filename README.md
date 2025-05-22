@@ -27,13 +27,16 @@ Language server for Package.swift files that provides:
   - Package details including location and state when hovering over package names
   - Available products in the package
 
-## Installation
+## Installation & Editor Integration
 
-Installation instructions are currently in progress. Stay tuned for detailed setup guides.
+The easiest way to get started is through editor extensions:
 
-## Editor Integration
+- **[Zed](https://zed.dev/)**: Install the [Package.swift LSP extension](https://github.com/kattouf/package-swift-lsp-zed) from the Zed extension marketplace
+- **[Visual Studio Code](https://code.visualstudio.com/)**: Install the [Package.swift LSP extension](https://github.com/kattouf/package-swift-lsp-vscode) from the VSCode marketplace
 
-Editor integration guides for popular IDEs and text editors are currently being developed. Support for various editors (Zed, VSCode, Vim, Emacs, etc.) will be available soon.
+Support for additional editors (Vim, Emacs, etc.) is planned. If you'd like to see support for your preferred editor, please submit a feature request or consider contributing!
+
+The LSP server binary can also be downloaded directly from the [GitHub releases page](https://github.com/kattouf/package-swift-lsp/releases/latest).
 
 ## Acknowledgements
 
