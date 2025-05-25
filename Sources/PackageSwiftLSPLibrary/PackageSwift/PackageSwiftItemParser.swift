@@ -10,6 +10,7 @@ extension PackageSwiftItemParser {
     static func defaultParser(locationConverter: SourceLocationConverter) -> PackageSwiftItemParser {
         .compositeParser(parsers: [
             .functionParser(locationConverter: locationConverter),
+            .stringLiteralParser(locationConverter: locationConverter),
         ])
     }
 
@@ -89,5 +90,68 @@ extension PackageSwiftItemParser {
 
             return nil
         }
+    }
+}
+
+// MARK: - String Literal Parser
+
+extension PackageSwiftItemParser {
+    static func stringLiteralParser(locationConverter: SourceLocationConverter) -> PackageSwiftItemParser {
+        PackageSwiftItemParser { node, _ in
+            guard let stringLiteral = node.as(StringLiteralExprSyntax.self),
+                  let value = stringLiteral.segments.first?.description
+            else {
+                return nil
+            }
+
+            // Check if the string literal is in a target's dependencies array
+            if !isInTargetDependencies(node: stringLiteral) {
+                return nil
+            }
+
+            let range = stringLiteral.trimmedRange
+            let startPosition = OneBasedPosition(locationConverter.location(for: range.lowerBound))
+            let endPosition = OneBasedPosition(locationConverter.location(for: range.upperBound))
+
+            return .targetDependencyStringLiteral(value: value, range: .init(start: startPosition, end: endPosition))
+        }
+    }
+
+    private static func isInTargetDependencies(node: SyntaxProtocol) -> Bool {
+        // Check specific parent chain: StringLiteral -> ArrayElement -> ArrayElementList -> ArrayExpr -> LabeledExpr (dependencies) -> LabeledExprList -> FunctionCall
+
+        // StringLiteral -> ArrayElement
+        guard let arrayElement = node.parent?.as(ArrayElementSyntax.self) else {
+            return false
+        }
+
+        // ArrayElement -> ArrayElementList
+        guard let arrayElementList = arrayElement.parent?.as(ArrayElementListSyntax.self) else {
+            return false
+        }
+
+        // ArrayElementList -> Array
+        guard let arrayExpr = arrayElementList.parent?.as(ArrayExprSyntax.self) else {
+            return false
+        }
+
+        // Array -> LabeledExpr with "dependencies" label
+        guard let labeledExpr = arrayExpr.parent?.as(LabeledExprSyntax.self),
+              labeledExpr.label?.text == "dependencies" else {
+            return false
+        }
+
+        // LabeledExpr -> LabeledExprList -> FunctionCall
+        guard let labeledExprList = labeledExpr.parent?.as(LabeledExprListSyntax.self),
+              let functionCall = labeledExprList.parent?.as(FunctionCallExprSyntax.self),
+              let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) else {
+            return false
+        }
+
+        // Check if it's a target or plugin function
+        let functionName = memberAccess.declName.baseName.text
+        let targetFunctions = ["target", "executableTarget", "testTarget", "plugin"]
+
+        return targetFunctions.contains(functionName)
     }
 }
