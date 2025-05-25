@@ -2,7 +2,7 @@ import LanguageServerProtocol
 import Workspace
 
 final class CompletionService: Sendable {
-    private struct CompletionContext {
+    private struct FunctionCompletionContext {
         let packageSwiftDocument: PackageSwiftDocument
         let argument: PackageSwiftItem.FunctionArgument
     }
@@ -75,6 +75,12 @@ final class CompletionService: Sendable {
             default:
                 .empty
             }
+        case let .targetDependencyStringLiteral(value, range):
+            return try await completeProductStringLiteral(
+                query: value,
+                document: packageSwiftDocument,
+                range: range
+            )
         }
     }
 }
@@ -84,7 +90,7 @@ extension CompletionService {
 
     private func completePackageURL(
         query: String,
-        context: CompletionContext
+        context: FunctionCompletionContext
     ) async throws -> CompletionResponse {
         logger.debug("Complete package URL by query: '\(query)'")
         guard !query.isEmpty else {
@@ -111,7 +117,7 @@ extension CompletionService {
 
     // MARK: - Git Provider
 
-    private func completePackageVersion(query: String, url: String, context: CompletionContext) async throws -> CompletionResponse {
+    private func completePackageVersion(query: String, url: String, context: FunctionCompletionContext) async throws -> CompletionResponse {
         logger.debug("Complete package version by query: '\(query)' for url: '\(url)'")
         let refs = try await gitRefsProvider.get(.tags, for: url)
             .compactMap(Semver.init(string:))
@@ -129,7 +135,7 @@ extension CompletionService {
         return completionResponse
     }
 
-    private func completePackageBranch(query: String, url: String, context: CompletionContext) async throws -> CompletionResponse {
+    private func completePackageBranch(query: String, url: String, context: FunctionCompletionContext) async throws -> CompletionResponse {
         logger.debug("Complete package branch by query: '\(query)' for url: '\(url)'")
         let refs = try await gitRefsProvider.get(.branches, for: url)
         guard !query.isEmpty else {
@@ -143,7 +149,44 @@ extension CompletionService {
 
     // MARK: - SPM Provider
 
-    private func completeProductName(query: String, package: String?, context: CompletionContext) async throws -> CompletionResponse {
+    private func completeProductStringLiteral(
+        query: String,
+        document: PackageSwiftDocument,
+        range: OneBasedRange
+    ) async throws -> CompletionResponse {
+        logger.debug("Complete product string literal by query: '\(query)')'")
+        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
+
+        let allProducts: [CompletionItemDTO] = resolvedPackages
+            .flatMap { package in
+                let packageName = package.displayName.lowercased() == package.identity.description
+                    ? package.displayName
+                    : package.identity.description
+                return package.products.map {
+                    CompletionItemDTO(
+                        label: $0,
+                        insertText: ".product(name: \"\($0)\", package: \"\(packageName)\")",
+                        insertRange: range,
+                    )
+                }
+            }
+        guard !query.isEmpty else {
+            logger.info("Found \(allProducts.count) candidates for product name")
+            return allProducts
+                .asCompletionResponse(disableFilter: true)
+        }
+
+        let completionResponse = FuzzySearch(query: query, candidates: allProducts, searchBy: { $0.label })()
+            .asCompletionResponse()
+        logger.info("Found \(completionResponse?.items.count ?? 0) candidates for product name")
+        return completionResponse
+    }
+
+    private func completeProductName(
+        query: String,
+        package: String?,
+        context: FunctionCompletionContext
+    ) async throws -> CompletionResponse {
         logger.debug("Complete product name by query: '\(query)' for package: '\(package ?? "")'")
         let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: context.packageSwiftDocument)
 
@@ -190,7 +233,11 @@ extension CompletionService {
         }
     }
 
-    private func completeProductPackage(query: String, product: String?, context: CompletionContext) async throws -> CompletionResponse {
+    private func completeProductPackage(
+        query: String,
+        product: String?,
+        context: FunctionCompletionContext
+    ) async throws -> CompletionResponse {
         logger.debug("Complete product package name by query: '\(query)' for product: '\(product ?? "")'")
         let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: context.packageSwiftDocument)
 

@@ -1,6 +1,7 @@
 enum PackageSwiftItem {
     case packageFunctionCall(arguments: NonEmptyFunctionArguments)
     case productFunctionCall(arguments: NonEmptyFunctionArguments)
+    case targetDependencyStringLiteral(value: String, range: OneBasedRange)
 }
 
 extension PackageSwiftItem {
