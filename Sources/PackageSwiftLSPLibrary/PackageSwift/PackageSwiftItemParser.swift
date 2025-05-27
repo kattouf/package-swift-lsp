@@ -118,10 +118,15 @@ extension PackageSwiftItemParser {
     }
 
     private static func isInTargetDependencies(node: SyntaxProtocol) -> Bool {
-        // Check specific parent chain: StringLiteral -> ArrayElement -> ArrayElementList -> ArrayExpr -> LabeledExpr (dependencies) -> LabeledExprList -> FunctionCall
+        // Check specific parent chain: StringLiteral -> ArrayElement -> ArrayElementList -> ArrayExpr -> LabeledExpr (dependencies) ->
+        // LabeledExprList -> FunctionCall
 
         // StringLiteral -> ArrayElement
-        guard let arrayElement = node.parent?.as(ArrayElementSyntax.self) else {
+        // or
+        // StringLiteral -> MemberAccessExpr -> FunctionCallExpr -> ArrayElement (When we write literal without comma after it)
+        let arrayElementOpt: ArrayElementSyntax? = node.parent?.as(ArrayElementSyntax.self)
+            ?? node.parent?.as(MemberAccessExprSyntax.self)?.parent?.as(FunctionCallExprSyntax.self)?.parent?.as(ArrayElementSyntax.self)
+        guard let arrayElement = arrayElementOpt else {
             return false
         }
 
@@ -137,14 +142,16 @@ extension PackageSwiftItemParser {
 
         // Array -> LabeledExpr with "dependencies" label
         guard let labeledExpr = arrayExpr.parent?.as(LabeledExprSyntax.self),
-              labeledExpr.label?.text == "dependencies" else {
+              labeledExpr.label?.text == "dependencies"
+        else {
             return false
         }
 
         // LabeledExpr -> LabeledExprList -> FunctionCall
         guard let labeledExprList = labeledExpr.parent?.as(LabeledExprListSyntax.self),
               let functionCall = labeledExprList.parent?.as(FunctionCallExprSyntax.self),
-              let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) else {
+              let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
+        else {
             return false
         }
 
