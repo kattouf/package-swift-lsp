@@ -167,6 +167,7 @@ extension CompletionService {
                         label: $0,
                         insertText: ".product(name: \"\($0)\", package: \"\(packageName)\")",
                         insertRange: range,
+                        documentation: packageName,
                     )
                 }
             }
