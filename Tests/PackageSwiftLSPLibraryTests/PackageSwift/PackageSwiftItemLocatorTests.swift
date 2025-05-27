@@ -98,6 +98,41 @@ struct PackageSwiftItemLocatorTests {
             #expect(functionName == "product")
             #expect(argumentName == "\(argumentNameUnderCursor)")
             #expect(argumentValue == argumentValueUnderCursor)
+        case .targetDependencyStringLiteral:
+            Issue.record("Unexpected flow")
+        }
+    }
+
+    @Test(arguments: [
+        (
+            line: 47,
+            column: 35,
+            targetName: "StringTargetWithoutComma"
+        ),
+        (
+            line: 49,
+            column: 35,
+            targetName: "StringTargetWithComma"
+        ),
+    ])
+    func locatePackageSwiftTargetDependencyStringLiteral(
+        line: Int,
+        column: Int,
+        targetName: String,
+    ) throws {
+        let cursorPosition = try #require(OneBasedPosition(line: line, column: column))
+
+        let item = try #require(Self.locator.item(at: cursorPosition))
+
+        switch item {
+        case .packageFunctionCall:
+            Issue.record("Unexpected flow")
+        case .productFunctionCall:
+            Issue.record("Unexpected flow")
+        case let .targetDependencyStringLiteral(value, range):
+            #expect(range.start <= cursorPosition)
+            #expect(range.end >= cursorPosition)
+            #expect(value == targetName)
         }
     }
 }

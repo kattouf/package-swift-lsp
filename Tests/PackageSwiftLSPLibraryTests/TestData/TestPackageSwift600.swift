@@ -45,7 +45,9 @@ let package = Package(
         .testTarget(
             name: "PackageSwiftLSPLibraryTests",
             dependencies: [
+                "StringTargetWithoutComma"
                 .target(name: "PackageSwiftLSPLibrary"),
+                "StringTargetWithComma",
             ]
         ),
     ]

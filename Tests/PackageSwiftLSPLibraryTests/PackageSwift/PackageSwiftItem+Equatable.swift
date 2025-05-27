@@ -7,7 +7,9 @@ extension PackageSwiftItem: Equatable {
             lhsArgs == rhsArgs
         case let (.productFunctionCall(lhsArgs), .productFunctionCall(rhsArgs)):
             lhsArgs == rhsArgs
-        default:
+        case let (.targetDependencyStringLiteral(lhsValue, lhsRange), .targetDependencyStringLiteral(rhsValue, rhsRange)):
+            lhsValue == rhsValue && lhsRange == rhsRange
+        case (_, _):
             false
         }
     }

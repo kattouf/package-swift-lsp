@@ -18,4 +18,14 @@ final class PackageSwiftItemCollector: SyntaxVisitor {
         items.append(functionCallItem)
         return .skipChildren
     }
+
+    override func visit(_ node: StringLiteralExprSyntax) -> SyntaxVisitorContinueKind {
+        let stringParser = PackageSwiftItemParser.stringLiteralParser(locationConverter: locationConverter)
+        guard let stringLiteralItem = stringParser.parse(node, nil) else {
+            return .visitChildren
+        }
+
+        items.append(stringLiteralItem)
+        return .skipChildren
+    }
 }
