@@ -21,6 +21,8 @@ Language server for Package.swift files that provides:
   - In `.product(...)` function:
     - `name:` argument with available product suggestions from dependencies
     - `package:` argument with package name suggestions
+  - In target dependencies string literals:
+    - Product name completion that automatically expands to `.product(name: "ProductName", package: "PackageName")` format
 > [!NOTE]
 > After editing package dependencies (`.package(...)`), save the file for changes to be reflected in target completions.
 
@@ -33,6 +35,17 @@ Language server for Package.swift files that provides:
 The easiest way to get started is through editor extensions:
 
 - **[Zed](https://zed.dev/)**: Install the [Package.swift LSP extension](https://github.com/kattouf/package-swift-lsp-zed) from the Zed extension marketplace
+> [!NOTE]
+> For proper Swift language server functionality in non-Package.swift files, configure the language server order in your Zed settings:
+> ```json
+> {
+>   "languages": {
+>     "Swift": {
+>       "language_servers": ["sourcekit-lsp", "package-swift-lsp"]
+>     }
+>   }
+> }
+> ```
 - **[Visual Studio Code](https://code.visualstudio.com/)**: Install the [Package.swift LSP extension](https://github.com/kattouf/package-swift-lsp-vscode) from the VSCode marketplace
 
 Support for additional editors (Vim, Emacs, etc.) is planned. If you'd like to see support for your preferred editor, please submit a feature request or consider contributing!
