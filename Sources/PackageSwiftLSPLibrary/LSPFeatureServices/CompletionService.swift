@@ -75,11 +75,11 @@ final class CompletionService: Sendable {
             default:
                 .empty
             }
-        case let .targetDependencyStringLiteral(value, range):
+        case let .targetDependencyStringLiteral(value, valueRange):
             return try await completeProductStringLiteral(
                 query: value,
                 document: packageSwiftDocument,
-                range: range
+                valueRange: valueRange
             )
         }
     }
@@ -152,33 +152,61 @@ extension CompletionService {
     private func completeProductStringLiteral(
         query: String,
         document: PackageSwiftDocument,
-        range: OneBasedRange
+        valueRange: OneBasedRange
     ) async throws -> CompletionResponse {
         logger.debug("Complete product string literal by query: '\(query)')'")
         let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
 
-        let allProducts: [CompletionItemDTO] = resolvedPackages
+        let allProducts: [CompletionItem] = resolvedPackages
             .flatMap { package in
                 let packageName = package.displayName.lowercased() == package.identity.description
                     ? package.displayName
                     : package.identity.description
                 return package.products.map {
-                    CompletionItemDTO(
+                    CompletionItem(
                         label: $0,
-                        insertText: ".product(name: \"\($0)\", package: \"\(packageName)\")",
-                        insertRange: range,
-                        documentation: packageName,
+                        kind: .value,
+                        documentation: .optionA(packageName),
+                        textEdit: .optionA(
+                            TextEdit(
+                                range: LSPRange(valueRange),
+                                newText: $0
+                            )
+                        ),
+                        additionalTextEdits: [
+                            TextEdit(
+                                range: LSPRange(
+                                    start: Position(valueRange.end.shiftedColumn(by: $0.count + 1)!),
+                                    end: Position(valueRange.end.shiftedColumn(by: $0.count + 1)!)
+                                ),
+                                newText: ", package: \"\(packageName)\"),"
+                            ),
+                            TextEdit(
+                                range: LSPRange(
+                                    start: Position(valueRange.start.shiftedColumn(by: -1)!),
+                                    end: Position(valueRange.start.shiftedColumn(by: -1)!)
+                                ),
+                                newText: ".product(name: "
+                            ),
+                        ]
                     )
                 }
             }
         guard !query.isEmpty else {
             logger.info("Found \(allProducts.count) candidates for product name")
-            return allProducts
-                .asCompletionResponse(disableFilter: true)
+            return .optionB(CompletionList(
+                isIncomplete: false,
+                items: allProducts
+            ))
         }
 
-        let completionResponse = FuzzySearch(query: query, candidates: allProducts, searchBy: { $0.label })()
-            .asCompletionResponse()
+        let completionItems = FuzzySearch(query: query, candidates: allProducts, searchBy: { $0.label })()
+        let completionResponse: CompletionResponse = .optionB(
+            CompletionList(
+                isIncomplete: false,
+                items: completionItems
+            )
+        )
         logger.info("Found \(completionResponse?.items.count ?? 0) candidates for product name")
         return completionResponse
     }

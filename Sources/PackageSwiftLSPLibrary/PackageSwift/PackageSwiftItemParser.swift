@@ -55,15 +55,14 @@ extension PackageSwiftItemParser {
             return call.arguments.compactMap { argument -> PackageSwiftItem.FunctionArgument? in
                 guard let labelText = argument.label?.text,
                       let label = PackageSwiftItem.FunctionArgumentLabel.from(label: labelText),
-                      let stringLiteralExpression = argument.expression.as(StringLiteralExprSyntax.self)?.segments,
+                      let stringLiteralSegmentList = argument.expression.as(StringLiteralExprSyntax.self)?.segments,
                       allowed.contains(label)
                 else {
                     return nil
                 }
 
-                let value = stringLiteralExpression.trimmedDescription
-
-                let range = stringLiteralExpression.trimmedRange
+                let value = stringLiteralSegmentList.trimmedDescription
+                let range = stringLiteralSegmentList.trimmedRange
                 let startPosition = OneBasedPosition(locationConverter.location(for: range.lowerBound))
                 let endPosition = OneBasedPosition(locationConverter.location(for: range.upperBound))
 
@@ -97,23 +96,23 @@ extension PackageSwiftItemParser {
 
 extension PackageSwiftItemParser {
     static func stringLiteralParser(locationConverter: SourceLocationConverter) -> PackageSwiftItemParser {
-        PackageSwiftItemParser { node, _ in
-            guard let stringLiteral = node.as(StringLiteralExprSyntax.self),
-                  let value = stringLiteral.segments.first?.description
-            else {
+        PackageSwiftItemParser { node, _ -> PackageSwiftItem? in
+            guard let stringLiteralExpression = node.as(StringLiteralExprSyntax.self) else {
                 return nil
             }
 
             // Check if the string literal is in a target's dependencies array
-            if !isInTargetDependencies(node: stringLiteral) {
+            if !isInTargetDependencies(node: stringLiteralExpression) {
                 return nil
             }
 
-            let range = stringLiteral.trimmedRange
+            let stringLiteralSegmentList = stringLiteralExpression.segments
+            let value = stringLiteralSegmentList.trimmedDescription
+            let range = stringLiteralSegmentList.trimmedRange
             let startPosition = OneBasedPosition(locationConverter.location(for: range.lowerBound))
             let endPosition = OneBasedPosition(locationConverter.location(for: range.upperBound))
 
-            return .targetDependencyStringLiteral(value: value, range: .init(start: startPosition, end: endPosition))
+            return .targetDependencyStringLiteral(value: value, valueRange: .init(start: startPosition, end: endPosition))
         }
     }
 

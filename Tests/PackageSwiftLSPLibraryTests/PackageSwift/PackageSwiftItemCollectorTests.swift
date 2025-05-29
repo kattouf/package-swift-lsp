@@ -199,11 +199,11 @@ struct PackageSwiftItemCollectorTests {
             ])!),
             .targetDependencyStringLiteral(
                 value: "StringTargetWithoutComma",
-                range: range(startLine: 47, startColumn: 17, endLine: 47, endColumn: 43)
+                valueRange: range(startLine: 47, startColumn: 18, endLine: 47, endColumn: 42)
             ),
             .targetDependencyStringLiteral(
                 value: "StringTargetWithComma",
-                range: range(startLine: 49, startColumn: 17, endLine: 49, endColumn: 40)
+                valueRange: range(startLine: 49, startColumn: 18, endLine: 49, endColumn: 39)
             ),
         ]
 
