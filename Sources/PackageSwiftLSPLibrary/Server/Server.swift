@@ -8,7 +8,7 @@ package final class Server {
     private let eventHandler: BaseEventHandler
 
     package init() {
-        let channel = DataChannel.stdioPipe()
+        let channel = DataChannel.stdio()
         connection = JSONRPCClientConnection(channel)
         eventHandler = BaseEventHandler()
     }

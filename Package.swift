@@ -13,7 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
-        .package(url: "https://github.com/ChimeHQ/LanguageServerProtocol", branch: "main"),
+        .package(url: "https://github.com/ChimeHQ/LanguageServerProtocol", from: "0.14.0"),
         .package(url: "https://github.com/ChimeHQ/LanguageServer", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "510.0.1"),
         .package(url: "https://github.com/swiftlang/swift-package-manager", revision: "1fc90e29029bfeafe3550ccf08f74a86a11baa23"),
