@@ -5,7 +5,7 @@ import Testing
 
 struct PackageSwiftItemCollectorTests {
     @Test
-    func collectPackageAndProductFunctionCalls() {
+    func collectPackageSwiftItems() {
         let tree = Parser.parse(source: packageSwift600Fake)
         let converter = SourceLocationConverter(fileName: "/foo/bar/Package.swift", tree: tree)
         let collector = PackageSwiftItemCollector(locationConverter: converter)
@@ -197,6 +197,14 @@ struct PackageSwiftItemCollectorTests {
                     stringValue: "swift-concurrency-extras"
                 ),
             ])!),
+            .targetDependencyStringLiteral(
+                value: "StringTargetWithoutComma",
+                valueRange: range(startLine: 47, startColumn: 18, endLine: 47, endColumn: 42)
+            ),
+            .targetDependencyStringLiteral(
+                value: "StringTargetWithComma",
+                valueRange: range(startLine: 49, startColumn: 18, endLine: 49, endColumn: 39)
+            ),
         ]
 
         #expect(items == expectedItems)

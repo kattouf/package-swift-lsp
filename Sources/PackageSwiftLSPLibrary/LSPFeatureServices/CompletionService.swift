@@ -2,11 +2,6 @@ import LanguageServerProtocol
 import Workspace
 
 final class CompletionService: Sendable {
-    private struct CompletionContext {
-        let packageSwiftDocument: PackageSwiftDocument
-        let argument: PackageSwiftItem.FunctionArgument
-    }
-
     private let resolvedDependenciesProvider: PackageSwiftDependenciesProvider = .shared
     private let packagesRegistry: PackagesRegistry = .shared
     private let gitRefsProvider: GitRefsProvider = .shared
@@ -29,14 +24,14 @@ final class CompletionService: Sendable {
             case .url:
                 try await completePackageURL(
                     query: argument.stringValue,
-                    context: .init(packageSwiftDocument: packageSwiftDocument, argument: argument)
+                    queryRange: argument.stringValueRange
                 )
             case .branch:
                 if let urlArgument = arguments[.url] {
                     try await completePackageBranch(
                         query: argument.stringValue,
-                        url: urlArgument.stringValue,
-                        context: .init(packageSwiftDocument: packageSwiftDocument, argument: argument)
+                        queryRange: argument.stringValueRange,
+                        url: urlArgument.stringValue
                     )
                 } else {
                     .empty
@@ -46,8 +41,8 @@ final class CompletionService: Sendable {
                 if let urlArgument = arguments[.url] {
                     try await completePackageVersion(
                         query: argument.stringValue,
-                        url: urlArgument.stringValue,
-                        context: .init(packageSwiftDocument: packageSwiftDocument, argument: argument)
+                        queryRange: argument.stringValueRange,
+                        url: urlArgument.stringValue
                     )
                 } else {
                     .empty
@@ -63,18 +58,26 @@ final class CompletionService: Sendable {
             case .name:
                 try await completeProductName(
                     query: argument.stringValue,
+                    queryRange: argument.stringValueRange,
                     package: arguments[.package]?.stringValue,
-                    context: .init(packageSwiftDocument: packageSwiftDocument, argument: argument)
+                    document: packageSwiftDocument
                 )
             case .package:
                 try await completeProductPackage(
                     query: argument.stringValue,
+                    queryRange: argument.stringValueRange,
                     product: arguments[.name]?.stringValue,
-                    context: .init(packageSwiftDocument: packageSwiftDocument, argument: argument)
+                    document: packageSwiftDocument
                 )
             default:
                 .empty
             }
+        case let .targetDependencyStringLiteral(value, valueRange):
+            return try await completeProductNameWithPackage(
+                query: value,
+                queryRange: valueRange,
+                document: packageSwiftDocument
+            )
         }
     }
 }
@@ -84,7 +87,7 @@ extension CompletionService {
 
     private func completePackageURL(
         query: String,
-        context: CompletionContext
+        queryRange: OneBasedRange
     ) async throws -> CompletionResponse {
         logger.debug("Complete package URL by query: '\(query)'")
         guard !query.isEmpty else {
@@ -102,7 +105,7 @@ extension CompletionService {
             CompletionItemDTO(
                 label: searchStringGenerator($0),
                 insertText: $0.url,
-                insertRange: context.argument.stringValueRange
+                insertRange: queryRange
             )
         }
         logger.info("Found \(completionItems.count) candidates for package URL")
@@ -111,13 +114,13 @@ extension CompletionService {
 
     // MARK: - Git Provider
 
-    private func completePackageVersion(query: String, url: String, context: CompletionContext) async throws -> CompletionResponse {
+    private func completePackageVersion(query: String, queryRange: OneBasedRange, url: String) async throws -> CompletionResponse {
         logger.debug("Complete package version by query: '\(query)' for url: '\(url)'")
         let refs = try await gitRefsProvider.get(.tags, for: url)
             .compactMap(Semver.init(string:))
             .sorted { Semver.areInIncreasingOrder(lhs: $1, rhs: $0) }
             .enumerated().map { index, ref in
-                CompletionItemDTO(label: ref.stringValue, insertRange: context.argument.stringValueRange, positionIndex: index)
+                CompletionItemDTO(label: ref.stringValue, insertRange: queryRange, positionIndex: index)
             }
 
         guard !query.isEmpty else {
@@ -129,23 +132,90 @@ extension CompletionService {
         return completionResponse
     }
 
-    private func completePackageBranch(query: String, url: String, context: CompletionContext) async throws -> CompletionResponse {
+    private func completePackageBranch(query: String, queryRange: OneBasedRange, url: String) async throws -> CompletionResponse {
         logger.debug("Complete package branch by query: '\(query)' for url: '\(url)'")
         let refs = try await gitRefsProvider.get(.branches, for: url)
         guard !query.isEmpty else {
             return refs.asCompletionResponse(disableFilter: true)
         }
         let completionResponse = FuzzySearch(query: query, candidates: refs)()
-            .asCompletionResponse(insertRange: context.argument.stringValueRange)
+            .asCompletionResponse(insertRange: queryRange)
         logger.info("Found \(completionResponse?.items.count ?? 0) candidates for package branch")
         return completionResponse
     }
 
     // MARK: - SPM Provider
 
-    private func completeProductName(query: String, package: String?, context: CompletionContext) async throws -> CompletionResponse {
+    private func completeProductNameWithPackage(
+        query: String,
+        queryRange: OneBasedRange,
+        document: PackageSwiftDocument,
+    ) async throws -> CompletionResponse {
+        logger.debug("Complete product name with package by query: '\(query)')'")
+        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
+
+        let completionItems: [CompletionItem] = resolvedPackages
+            .flatMap { package in
+                let packageName = package.displayName.lowercased() == package.identity.description
+                    ? package.displayName
+                    : package.identity.description
+                return package.products.map {
+                    CompletionItem(
+                        label: $0,
+                        kind: .value,
+                        documentation: .optionA(packageName),
+                        textEdit: .optionA(
+                            TextEdit(
+                                range: LSPRange(queryRange),
+                                newText: $0
+                            )
+                        ),
+                        additionalTextEdits: [
+                            TextEdit(
+                                range: LSPRange(
+                                    start: Position(queryRange.end.shiftedColumn(by: $0.count + 1)!),
+                                    end: Position(queryRange.end.shiftedColumn(by: $0.count + 1)!)
+                                ),
+                                newText: ", package: \"\(packageName)\"),"
+                            ),
+                            TextEdit(
+                                range: LSPRange(
+                                    start: Position(queryRange.start.shiftedColumn(by: -1)!),
+                                    end: Position(queryRange.start.shiftedColumn(by: -1)!)
+                                ),
+                                newText: ".product(name: "
+                            ),
+                        ]
+                    )
+                }
+            }
+        guard !query.isEmpty else {
+            logger.info("Found \(completionItems.count) candidates for product name")
+            return .optionB(CompletionList(
+                isIncomplete: false,
+                items: completionItems
+            ))
+        }
+
+        let filteredItems = FuzzySearch(query: query, candidates: completionItems, searchBy: { $0.label })()
+        let completionResponse: CompletionResponse = .optionB(
+            CompletionList(
+                isIncomplete: false,
+                items: filteredItems
+            )
+        )
+        logger.info("Found \(completionResponse?.items.count ?? 0) candidates for product name")
+        return completionResponse
+    }
+
+    private func completeProductName(
+        query: String,
+        queryRange: OneBasedRange,
+        package: String?,
+        document: PackageSwiftDocument
+    ) async throws -> CompletionResponse {
         logger.debug("Complete product name by query: '\(query)' for package: '\(package ?? "")'")
-        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: context.packageSwiftDocument)
+        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
 
         if
             let package,
@@ -157,11 +227,11 @@ extension CompletionService {
             guard !query.isEmpty else {
                 logger.info("Found \(packageInfo.products.count) candidates for product name")
                 return packageInfo.products
-                    .asCompletionResponse(disableFilter: true, insertRange: context.argument.stringValueRange)
+                    .asCompletionResponse(disableFilter: true, insertRange: queryRange)
             }
 
             let completionResponse = FuzzySearch(query: query, candidates: packageInfo.products)()
-                .asCompletionResponse(insertRange: context.argument.stringValueRange)
+                .asCompletionResponse(insertRange: queryRange)
             logger.info("Found \(completionResponse?.items.count ?? 0) candidates for product name")
             return completionResponse
         } else {
@@ -170,7 +240,7 @@ extension CompletionService {
                     package.products.map {
                         CompletionItemDTO(
                             label: $0,
-                            insertRange: context.argument.stringValueRange,
+                            insertRange: queryRange,
                             documentation: package.displayName.lowercased() == package.identity.description
                                 ? package.displayName
                                 : package.identity.description,
@@ -190,9 +260,14 @@ extension CompletionService {
         }
     }
 
-    private func completeProductPackage(query: String, product: String?, context: CompletionContext) async throws -> CompletionResponse {
+    private func completeProductPackage(
+        query: String,
+        queryRange: OneBasedRange,
+        product: String?,
+        document: PackageSwiftDocument
+    ) async throws -> CompletionResponse {
         logger.debug("Complete product package name by query: '\(query)' for product: '\(product ?? "")'")
-        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: context.packageSwiftDocument)
+        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
 
         let packages: [CompletionItemDTO] = resolvedPackages
             .filter {
@@ -206,7 +281,7 @@ extension CompletionService {
                     label: $0.displayName.lowercased() == $0.identity.description
                         ? $0.displayName
                         : $0.identity.description,
-                    insertRange: context.argument.stringValueRange,
+                    insertRange: queryRange,
                     documentation: $0.stateDescription
                 )
             }

@@ -90,11 +90,15 @@ extension PackageSwiftItem: DeterministicHashable {
             "packageFunctionCall(\(arguments.deterministicHashValue))"
         case let .productFunctionCall(arguments):
             "productFunctionCall(\(arguments.deterministicHashValue))"
+        // TODO: include range in hash value?
+        case let .targetDependencyStringLiteral(value, _):
+            "targetDependencyStringLiteral(\(value))"
         }
     }
 }
 
 extension PackageSwiftItem.NonEmptyFunctionArguments: DeterministicHashable {
+    // TODO: include range in hash value?
     var deterministicHashValue: String {
         arguments.map { "\($0.label):\($0.stringValue)" }.sorted().deterministicHashValue
     }
