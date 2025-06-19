@@ -18,11 +18,12 @@ final class PackageSwiftDependenciesResolver: Sendable {
         let handler = ObservabilityHandlerWithDiagnostics()
         let observabilitySystem = ObservabilitySystem(handler)
         let localFileSystem = Basics.localFileSystem
+        let scratchDirectory = Workspace.DefaultLocations.scratchDirectory(forRootPackage: rootPackagePath)
+            .appending(component: "package-swift-lsp")
 
         var location = try Workspace.Location(forRootPackage: rootPackagePath, fileSystem: localFileSystem)
-        // FIXME: use Workspace.DefaultLocations
-        location.scratchDirectory = location.scratchDirectory.appending(component: "package-swift-lsp")
-        location.resolvedVersionsFile = location.scratchDirectory
+        location.scratchDirectory = scratchDirectory
+        location.resolvedVersionsFile = scratchDirectory
             .appending(component: "Package\(cacheKey.map { "-\($0)" } ?? "").resolved")
 
         if !localFileSystem.exists(location.resolvedVersionsFile) {
