@@ -9,6 +9,10 @@ extension PackageSwiftItem: Equatable {
             lhsArgs == rhsArgs
         case let (.targetDependencyStringLiteral(lhsValue, lhsRange), .targetDependencyStringLiteral(rhsValue, rhsRange)):
             lhsValue == rhsValue && lhsRange == rhsRange
+        case let (.targetDefinitionFunctionCall(lhsArgs), .targetDefinitionFunctionCall(rhsArgs)):
+            lhsArgs == rhsArgs
+        case let (.targetDeclarationFunctionCall(lhsArgs), .targetDeclarationFunctionCall(rhsArgs)):
+            lhsArgs == rhsArgs
         case (_, _):
             false
         }

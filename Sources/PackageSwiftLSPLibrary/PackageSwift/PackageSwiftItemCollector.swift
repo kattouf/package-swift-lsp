@@ -16,7 +16,15 @@ final class PackageSwiftItemCollector: SyntaxVisitor {
         }
 
         items.append(functionCallItem)
-        return .skipChildren
+
+        if case .targetDefinitionFunctionCall = functionCallItem {
+            return .visitChildren
+        } else if case .targetDeclarationFunctionCall = functionCallItem {
+            // case if string literal without go before target declaration and parsed as part of target declaration
+            return .visitChildren
+        } else {
+            return .skipChildren
+        }
     }
 
     override func visit(_ node: StringLiteralExprSyntax) -> SyntaxVisitorContinueKind {
