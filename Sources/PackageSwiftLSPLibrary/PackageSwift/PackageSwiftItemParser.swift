@@ -79,11 +79,25 @@ extension PackageSwiftItemParser {
                    activeArgumentIndex: position.flatMap { findCurrentArgumentIndex(in: call, at: $0) }
                )
             {
+                // TODO: Check calls scope to be sure that is the correct function call
                 switch functionKind {
                 case .package:
                     return .packageFunctionCall(arguments: arguments)
                 case .product:
                     return .productFunctionCall(arguments: arguments)
+                case .target:
+                    return if isInTargetDependencies(node: call) {
+                        .targetDeclarationFunctionCall(arguments: arguments)
+                    } else {
+                        .targetDefinitionFunctionCall(arguments: arguments)
+                    }
+                case .testTarget,
+                     .executableTarget,
+                     .macroTarget,
+                     .binaryTarget,
+                     .pluginTarget,
+                     .systemLibraryTarget:
+                    return .targetDefinitionFunctionCall(arguments: arguments)
                 }
             }
 

@@ -4,7 +4,12 @@ import PackageGraph
 import PackageModel
 import Workspace
 
-struct ResolvedPackageInfo: Sendable, Equatable {
+struct ResolvedPackages: Sendable, Equatable {
+    let localPackages: [LocalPackageInfo]
+    let externalPackages: [ExternalPackageInfo]
+}
+
+struct ExternalPackageInfo: Sendable, Equatable {
     let identity: String
     let locationDescription: String
     let displayName: String
@@ -12,8 +17,18 @@ struct ResolvedPackageInfo: Sendable, Equatable {
     let products: [String]
 }
 
-final class PackageSwiftDependenciesResolver: Sendable {
-    func resolve(at rootPackagePath: AbsolutePath, cacheKey: String? = nil) async throws -> [ResolvedPackageInfo] {
+struct LocalPackageInfo: Sendable, Equatable {
+    let identity: String
+    let locationDescription: String
+    let displayName: String
+    let targets: [String]
+}
+
+final class PackageSwiftPackagesResolver: Sendable {
+    func resolve(
+        at rootPackagePath: AbsolutePath,
+        cacheKey: String? = nil
+    ) async throws -> ResolvedPackages {
         let rootInput = PackageGraphRootInput(packages: [rootPackagePath])
         let handler = ObservabilityHandlerWithDiagnostics()
         let observabilitySystem = ObservabilitySystem(handler)
@@ -46,13 +61,24 @@ final class PackageSwiftDependenciesResolver: Sendable {
         )
         if handler.hasErrors {
             try? localFileSystem.removeFileTree(location.resolvedVersionsFile)
-            throw StringError("Failed to resolve dependencies")
+            throw StringError("Failed to resolve package graph")
         }
         let resolvedDependencies = workspace.state.dependencies.reduce(into: [PackageIdentity: Workspace.ManagedDependency]()) {
             $0[$1.packageRef.identity] = $1
         }
 
-        var packagesInfo: [ResolvedPackageInfo] = []
+        var localPackagesInfo: [LocalPackageInfo] = []
+        var externalPackagesInfo: [ExternalPackageInfo] = []
+
+        for rootPackage in packageGraph.rootPackages {
+            let info = LocalPackageInfo(
+                identity: rootPackage.identity.description,
+                locationDescription: rootPackage.manifest.packageLocation,
+                displayName: rootPackage.manifest.displayName,
+                targets: rootPackage.manifest.targets.map(\.name)
+            )
+            localPackagesInfo.append(info)
+        }
 
         for package in packageGraph.packages {
             let identity = package.identity
@@ -61,7 +87,12 @@ final class PackageSwiftDependenciesResolver: Sendable {
                 continue
             }
 
-            let info = ResolvedPackageInfo(
+            // Skip if this is a root package (already added above)
+            if packageGraph.rootPackages.contains(where: { $0.identity == identity }) {
+                continue
+            }
+
+            let info = ExternalPackageInfo(
                 identity: identity.description,
                 locationDescription: resolvedDependency.packageRef.locationString,
                 displayName: package.manifest.displayName,
@@ -69,10 +100,10 @@ final class PackageSwiftDependenciesResolver: Sendable {
                 products: package.products.map { $0.name },
             )
 
-            packagesInfo.append(info)
+            externalPackagesInfo.append(info)
         }
 
-        return packagesInfo
+        return ResolvedPackages(localPackages: localPackagesInfo, externalPackages: externalPackagesInfo)
     }
 }
 

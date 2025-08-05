@@ -2,7 +2,7 @@ import LanguageServerProtocol
 import Workspace
 
 final class CompletionService: Sendable {
-    private let resolvedDependenciesProvider: PackageSwiftDependenciesProvider = .shared
+    private let resolvedPackagesProvider: PackageSwiftPackagesProvider = .shared
     private let packagesRegistry: PackagesRegistry = .shared
     private let gitRefsProvider: GitRefsProvider = .shared
 
@@ -73,11 +73,27 @@ final class CompletionService: Sendable {
                 .empty
             }
         case let .targetDependencyStringLiteral(value, valueRange):
-            return try await completeProductNameWithPackage(
+            return try await completeProductNameWithPackageOrLocalTarget(
                 query: value,
                 queryRange: valueRange,
                 document: packageSwiftDocument
             )
+        case .targetDefinitionFunctionCall:
+            return .empty
+        case let .targetDeclarationFunctionCall(arguments):
+            guard let argument = arguments.activeArgument() else {
+                return .empty
+            }
+            return switch argument.label {
+            case .name:
+                try await completeLocalTargetName(
+                    query: argument.stringValue,
+                    queryRange: argument.stringValueRange,
+                    document: packageSwiftDocument
+                )
+            default:
+                .empty
+            }
         }
     }
 }
@@ -146,15 +162,55 @@ extension CompletionService {
 
     // MARK: - SPM Provider
 
-    private func completeProductNameWithPackage(
+    private func completeProductNameWithPackageOrLocalTarget(
         query: String,
         queryRange: OneBasedRange,
         document: PackageSwiftDocument,
     ) async throws -> CompletionResponse {
         logger.debug("Complete product name with package by query: '\(query)')'")
-        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
+        let resolvedPackages = await resolvedPackagesProvider.resolvedPackages(for: document)
 
-        let completionItems: [CompletionItem] = resolvedPackages
+        var completionItems: [CompletionItem] = []
+
+        // Add local targets
+        let localPackagesTargets = resolvedPackages.localPackages.flatMap { package in
+            package.targets.map {
+                let packageName = package.displayName.lowercased() == package.identity.description
+                    ? package.displayName
+                    : package.identity.description
+                return CompletionItem(
+                    label: $0,
+                    kind: .value,
+                    documentation: .optionA("Local target (\(packageName))"),
+                    textEdit: .optionA(
+                        TextEdit(
+                            range: LSPRange(queryRange),
+                            newText: $0
+                        )
+                    ),
+                    additionalTextEdits: [
+                        TextEdit(
+                            range: LSPRange(
+                                start: Position(queryRange.end.shiftedColumn(by: $0.count + 1)!),
+                                end: Position(queryRange.end.shiftedColumn(by: $0.count + 1)!)
+                            ),
+                            newText: "),"
+                        ),
+                        TextEdit(
+                            range: LSPRange(
+                                start: Position(queryRange.start.shiftedColumn(by: -1)!),
+                                end: Position(queryRange.start.shiftedColumn(by: -1)!)
+                            ),
+                            newText: ".target(name: "
+                        ),
+                    ]
+                )
+            }
+        }
+        completionItems.append(contentsOf: localPackagesTargets)
+
+        // Add external products
+        let externalProductItems: [CompletionItem] = resolvedPackages.externalPackages
             .flatMap { package in
                 let packageName = package.displayName.lowercased() == package.identity.description
                     ? package.displayName
@@ -189,6 +245,8 @@ extension CompletionService {
                     )
                 }
             }
+        completionItems.append(contentsOf: externalProductItems)
+
         guard !query.isEmpty else {
             logger.info("Found \(completionItems.count) candidates for product name")
             return .optionB(CompletionList(
@@ -215,11 +273,11 @@ extension CompletionService {
         document: PackageSwiftDocument
     ) async throws -> CompletionResponse {
         logger.debug("Complete product name by query: '\(query)' for package: '\(package ?? "")'")
-        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
+        let externalPackages = await resolvedPackagesProvider.resolvedPackages(for: document).externalPackages
 
         if
             let package,
-            let packageInfo = resolvedPackages.first(where: {
+            let packageInfo = externalPackages.first(where: {
                 $0.identity.description == package.lowercased()
             }),
             !package.isEmpty
@@ -235,7 +293,7 @@ extension CompletionService {
             logger.info("Found \(completionResponse?.items.count ?? 0) candidates for product name")
             return completionResponse
         } else {
-            let allProducts: [CompletionItemDTO] = resolvedPackages
+            let allProducts: [CompletionItemDTO] = externalPackages
                 .flatMap { package in
                     package.products.map {
                         CompletionItemDTO(
@@ -267,9 +325,9 @@ extension CompletionService {
         document: PackageSwiftDocument
     ) async throws -> CompletionResponse {
         logger.debug("Complete product package name by query: '\(query)' for product: '\(product ?? "")'")
-        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
+        let externalPackages = await resolvedPackagesProvider.resolvedPackages(for: document).externalPackages
 
-        let packages: [CompletionItemDTO] = resolvedPackages
+        let packages: [CompletionItemDTO] = externalPackages
             .filter {
                 if let product, !product.isEmpty {
                     $0.products.map { $0.lowercased() }.contains(product.lowercased())
@@ -295,6 +353,39 @@ extension CompletionService {
         let completionResponse = FuzzySearch(query: query, candidates: packages, searchBy: { $0.label })()
             .asCompletionResponse()
         logger.info("Found \(completionResponse?.items.count ?? 0) candidates for product package")
+        return completionResponse
+    }
+
+    private func completeLocalTargetName(
+        query: String,
+        queryRange: OneBasedRange,
+        document: PackageSwiftDocument,
+    ) async throws -> CompletionResponse {
+        logger.debug("Complete local target name by query: '\(query)'")
+        let localPackages = await resolvedPackagesProvider.resolvedPackages(for: document).localPackages
+
+        let targets: [CompletionItemDTO] = localPackages.flatMap { package in
+            let packageName = package.displayName.lowercased() == package.identity.description
+                ? package.displayName
+                : package.identity.description
+            return package.targets.map {
+                CompletionItemDTO(
+                    label: $0,
+                    insertRange: queryRange,
+                    documentation: "Local target (\(packageName))",
+                )
+            }
+        }
+
+        guard !query.isEmpty else {
+            logger.info("Found \(targets.count) candidates for local target")
+            return targets
+                .asCompletionResponse(disableFilter: true)
+        }
+
+        let completionResponse = FuzzySearch(query: query, candidates: targets, searchBy: { $0.label })()
+            .asCompletionResponse()
+        logger.info("Found \(completionResponse?.items.count ?? 0) candidates for local target")
         return completionResponse
     }
 }

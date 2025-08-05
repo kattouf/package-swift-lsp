@@ -2,7 +2,7 @@ import JSONRPC
 import LanguageServerProtocol
 
 final class DocumentEventHandler {
-    private let resolvedDependenciesProvider = PackageSwiftDependenciesProvider.shared
+    private let resolvedPackagesProvider = PackageSwiftPackagesProvider.shared
     private let packagesRegistry = PackagesRegistry.shared
     private let progressTracker = ProgressTracker.shared
 
@@ -78,7 +78,7 @@ final class DocumentEventHandler {
         openDocuments[params.textDocument.uri] = document
 
         var dependenciesResolvingProgressToken: ProgressToken?
-        if await resolvedDependenciesProvider.shouldResolveDependencies(for: document) {
+        if await resolvedPackagesProvider.shouldResolvePackages(for: document) {
             do {
                 dependenciesResolvingProgressToken = try await progressTracker
                     .startTracking(title: "package-swift-lsp: Resolving dependencies")
@@ -86,7 +86,7 @@ final class DocumentEventHandler {
                 logger.error("Error starting progress tracking: \(error)")
             }
         }
-        try await resolvedDependenciesProvider.resolveDependencies(for: document)
+        try await resolvedPackagesProvider.resolvePackages(for: document)
         if let progressToken = dependenciesResolvingProgressToken {
             do {
                 try await progressTracker.stopTracking(progressToken)
@@ -125,7 +125,7 @@ final class DocumentEventHandler {
         }
 
         var progressToken: ProgressToken?
-        if await resolvedDependenciesProvider.shouldResolveDependencies(for: document) {
+        if await resolvedPackagesProvider.shouldResolvePackages(for: document) {
             do {
                 progressToken = try await progressTracker
                     .startTracking(title: "package-swift-lsp: Resolving dependencies")
@@ -134,7 +134,7 @@ final class DocumentEventHandler {
             }
         }
 
-        try await resolvedDependenciesProvider.resolveDependencies(for: document)
+        try await resolvedPackagesProvider.resolvePackages(for: document)
 
         if let progressToken {
             do {

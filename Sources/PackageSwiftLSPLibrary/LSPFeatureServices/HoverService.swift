@@ -2,7 +2,7 @@ import LanguageServerProtocol
 import Workspace
 
 final class HoverService {
-    private let resolvedDependenciesProvider: PackageSwiftDependenciesProvider = .shared
+    private let resolvedPackagesProvider: PackageSwiftPackagesProvider = .shared
 
     func hover(
         at position: Position,
@@ -42,9 +42,9 @@ private extension HoverService {
         package: String,
         context: PackageSwiftDocument
     ) async throws -> HoverResponse {
-        let resolvedPackages = await resolvedDependenciesProvider.resolvedDependencies(for: context)
+        let externalPackages = await resolvedPackagesProvider.resolvedPackages(for: context).externalPackages
         guard
-            let packageInfo = resolvedPackages.first(where: {
+            let packageInfo = externalPackages.first(where: {
                 $0.identity.description == package.lowercased()
             }),
             !package.isEmpty
