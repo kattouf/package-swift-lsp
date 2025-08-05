@@ -49,8 +49,8 @@ struct PackageSwiftItemLocatorTests {
             argumentValue: "jepa"
         ),
         (
-            line: 29,
-            column: 35,
+            line: 28,
+            column: 40,
             functionName: "target",
             argumentName: "name",
             argumentValue: "PackageSwiftLSPLibrary"
