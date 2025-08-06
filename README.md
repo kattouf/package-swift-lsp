@@ -21,8 +21,11 @@ Language server for Package.swift files that provides:
   - In `.product(...)` function:
     - `name:` argument with available product suggestions from dependencies
     - `package:` argument with package name suggestions
+  - In `.target(...)` function:
+    - `name:` argument with local target name suggestions from your package
   - In target dependencies string literals:
     - Product name completion that automatically expands to `.product(name: "ProductName", package: "PackageName")` format
+    - Local target name completion for referencing targets within your package to `.target(name: "LocalTarget")` format
 > [!NOTE]
 > After editing package dependencies (`.package(...)`), save the file for changes to be reflected in target completions.
 
