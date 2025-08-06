@@ -20,7 +20,7 @@ final class PackageSwiftItemCollector: SyntaxVisitor {
         if case .targetDefinitionFunctionCall = functionCallItem {
             return .visitChildren
         } else if case .targetDeclarationFunctionCall = functionCallItem {
-            // case if string literal without go before target declaration and parsed as part of target declaration
+            // case when string literal comes before target declaration
             return .visitChildren
         } else {
             return .skipChildren
