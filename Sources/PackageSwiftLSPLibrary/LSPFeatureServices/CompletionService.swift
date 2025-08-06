@@ -460,9 +460,7 @@ private extension [PackageSwiftItem] {
                 guard let nameArgument = arguments[.name] else {
                     return nil
                 }
-                if case .name = nameArgument.label {
-                    return nameArgument.stringValue
-                }
+                return nameArgument.stringValue
             }
             return nil
         }
