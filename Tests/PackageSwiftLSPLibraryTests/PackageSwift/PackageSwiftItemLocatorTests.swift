@@ -49,6 +49,13 @@ struct PackageSwiftItemLocatorTests {
             argumentValue: "jepa"
         ),
         (
+            line: 28,
+            column: 40,
+            functionName: "target",
+            argumentName: "name",
+            argumentValue: "PackageSwiftLSPLibrary"
+        ),
+        (
             line: 36,
             column: 35,
             functionName: "product",
@@ -100,6 +107,16 @@ struct PackageSwiftItemLocatorTests {
             #expect(argumentValue == argumentValueUnderCursor)
         case .targetDependencyStringLiteral:
             Issue.record("Unexpected flow")
+        case .targetDefinitionFunctionCall:
+            Issue.record("Unexpected flow")
+        case let .targetDeclarationFunctionCall(arguments):
+            let argumentUnderCursor = try #require(arguments.activeArgument())
+            let argumentNameUnderCursor = argumentUnderCursor.label
+            let argumentValueUnderCursor = argumentUnderCursor.stringValue
+
+            #expect(functionName == "target")
+            #expect(argumentName == "\(argumentNameUnderCursor)")
+            #expect(argumentValue == argumentValueUnderCursor)
         }
     }
 
@@ -133,6 +150,10 @@ struct PackageSwiftItemLocatorTests {
             #expect(range.start <= cursorPosition)
             #expect(range.end >= cursorPosition)
             #expect(value == targetName)
+        case .targetDeclarationFunctionCall:
+            Issue.record("Unexpected flow")
+        case .targetDefinitionFunctionCall:
+            Issue.record("Unexpected flow")
         }
     }
 }

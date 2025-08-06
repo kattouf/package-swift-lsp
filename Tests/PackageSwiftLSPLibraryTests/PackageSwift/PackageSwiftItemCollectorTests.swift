@@ -99,8 +99,13 @@ struct PackageSwiftItemCollectorTests {
                     stringValue: "1.3.1"
                 ),
             ])!),
-
-            // Product dependencies
+            .targetDefinitionFunctionCall(arguments: .init(arguments: [
+                .init(
+                    label: .name,
+                    stringValueRange: range(startLine: 25, startColumn: 20, endLine: 25, endColumn: 38),
+                    stringValue: "PackageSwiftLSPCLI"
+                ),
+            ])!),
             .productFunctionCall(arguments: .init(arguments: [
                 .init(
                     label: .name,
@@ -111,6 +116,20 @@ struct PackageSwiftItemCollectorTests {
                     label: .package,
                     stringValueRange: range(startLine: 27, startColumn: 60, endLine: 27, endColumn: 81),
                     stringValue: "swift-argument-parser"
+                ),
+            ])!),
+            .targetDeclarationFunctionCall(arguments: .init(arguments: [
+                .init(
+                    label: .name,
+                    stringValueRange: range(startLine: 28, startColumn: 32, endLine: 28, endColumn: 54),
+                    stringValue: "PackageSwiftLSPLibrary"
+                ),
+            ])!),
+            .targetDefinitionFunctionCall(arguments: .init(arguments: [
+                .init(
+                    label: .name,
+                    stringValueRange: range(startLine: 32, startColumn: 20, endLine: 32, endColumn: 42),
+                    stringValue: "PackageSwiftLSPLibrary"
                 ),
             ])!),
             .productFunctionCall(arguments: .init(arguments: [
@@ -195,6 +214,20 @@ struct PackageSwiftItemCollectorTests {
                     label: .package,
                     stringValueRange: range(startLine: 41, startColumn: 63, endLine: 41, endColumn: 87),
                     stringValue: "swift-concurrency-extras"
+                ),
+            ])!),
+            .targetDefinitionFunctionCall(arguments: .init(arguments: [
+                .init(
+                    label: .name,
+                    stringValueRange: range(startLine: 45, startColumn: 20, endLine: 45, endColumn: 47),
+                    stringValue: "PackageSwiftLSPLibraryTests"
+                ),
+            ])!),
+            .targetDeclarationFunctionCall(arguments: .init(arguments: [
+                .init(
+                    label: .name,
+                    stringValueRange: range(startLine: 48, startColumn: 32, endLine: 48, endColumn: 54),
+                    stringValue: "PackageSwiftLSPLibrary"
                 ),
             ])!),
             .targetDependencyStringLiteral(

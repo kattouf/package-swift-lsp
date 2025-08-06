@@ -93,6 +93,10 @@ extension PackageSwiftItem: DeterministicHashable {
         // TODO: include range in hash value?
         case let .targetDependencyStringLiteral(value, _):
             "targetDependencyStringLiteral(\(value))"
+        case let .targetDeclarationFunctionCall(arguments):
+            "targetDeclarationFunctionCall(\(arguments.deterministicHashValue))"
+        case let .targetDefinitionFunctionCall(arguments):
+            "targetDefinitionFunctionCall(\(arguments.deterministicHashValue))"
         }
     }
 }

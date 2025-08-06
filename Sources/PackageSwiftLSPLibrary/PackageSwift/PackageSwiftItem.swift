@@ -2,6 +2,8 @@ enum PackageSwiftItem {
     case packageFunctionCall(arguments: NonEmptyFunctionArguments)
     case productFunctionCall(arguments: NonEmptyFunctionArguments)
     case targetDependencyStringLiteral(value: String, valueRange: OneBasedRange)
+    case targetDefinitionFunctionCall(arguments: NonEmptyFunctionArguments)
+    case targetDeclarationFunctionCall(arguments: NonEmptyFunctionArguments)
 }
 
 extension PackageSwiftItem {
@@ -70,6 +72,14 @@ extension PackageSwiftItem {
                 [.name, .url, .exact, .branch, .revision, .from]
             case .product:
                 [.name, .package]
+            case .target,
+                 .testTarget,
+                 .executableTarget,
+                 .macroTarget,
+                 .binaryTarget,
+                 .pluginTarget,
+                 .systemLibraryTarget:
+                [.name]
             }
         }
     }
@@ -77,11 +87,25 @@ extension PackageSwiftItem {
     enum FunctionKind {
         case package
         case product
+        case target
+        case testTarget
+        case executableTarget
+        case macroTarget
+        case binaryTarget
+        case pluginTarget
+        case systemLibraryTarget
 
         static func from(memberName: String) -> FunctionKind? {
             switch memberName {
             case "package": .package
             case "product": .product
+            case "target": .target
+            case "testTarget": .testTarget
+            case "executableTarget": .executableTarget
+            case "macro": .macroTarget
+            case "binaryTarget": .binaryTarget
+            case "plugin": .pluginTarget
+            case "systemLibrary": .systemLibraryTarget
             default: nil
             }
         }
