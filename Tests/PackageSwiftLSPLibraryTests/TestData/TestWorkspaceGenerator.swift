@@ -15,7 +15,7 @@ enum TestWorkspaceGenerator {
         let sourcesPath = packagePath.appendingPathComponent("Sources")
         try FileManager.default.createDirectory(at: packagePath, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: sourcesPath, withIntermediateDirectories: true)
-        let dependenciesString = dependencies.map { ".package(url: \"\($0.url)\", from: \"\($0.exactVersion)\")" }
+        let dependenciesString = dependencies.map { ".package(url: \"\($0.url)\", exact: \"\($0.exactVersion)\")" }
             .joined(separator: ",\n        ")
         let packageManifest = """
         // swift-tools-version: \(toolsVersion)
