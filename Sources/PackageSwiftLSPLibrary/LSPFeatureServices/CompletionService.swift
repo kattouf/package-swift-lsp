@@ -2,7 +2,7 @@ import LanguageServerProtocol
 import Workspace
 
 final class CompletionService: Sendable {
-    private let resolvedPackagesProvider: PackageSwiftPackagesProvider = .shared
+    private let resolvedDependenciesProvider: PackageSwiftDependenciesProvider = .shared
     private let packagesRegistry: PackagesRegistry = .shared
     private let gitRefsProvider: GitRefsProvider = .shared
 
@@ -168,49 +168,42 @@ extension CompletionService {
         document: PackageSwiftDocument,
     ) async throws -> CompletionResponse {
         logger.debug("Complete product name with package by query: '\(query)')'")
-        let resolvedPackages = await resolvedPackagesProvider.resolvedPackages(for: document)
-
         var completionItems: [CompletionItem] = []
 
         // Add local targets
-        let localPackagesTargets = resolvedPackages.localPackages.flatMap { package in
-            package.targets.map {
-                let packageName = package.displayName.lowercased() == package.identity.description
-                    ? package.displayName
-                    : package.identity.description
-                return CompletionItem(
-                    label: $0,
-                    kind: .value,
-                    documentation: .optionA("Local target (\(packageName))"),
-                    textEdit: .optionA(
-                        TextEdit(
-                            range: LSPRange(queryRange),
-                            newText: $0
-                        )
+        let localTargets = document.allItems().definedTargetsNames.map {
+            CompletionItem(
+                label: $0,
+                kind: .value,
+                documentation: .optionA("Local target"),
+                textEdit: .optionA(
+                    TextEdit(
+                        range: LSPRange(queryRange),
+                        newText: $0
+                    )
+                ),
+                additionalTextEdits: [
+                    TextEdit(
+                        range: LSPRange(
+                            start: Position(queryRange.end.shiftedColumn(by: $0.count + 1)!),
+                            end: Position(queryRange.end.shiftedColumn(by: $0.count + 1)!)
+                        ),
+                        newText: "),"
                     ),
-                    additionalTextEdits: [
-                        TextEdit(
-                            range: LSPRange(
-                                start: Position(queryRange.end.shiftedColumn(by: $0.count + 1)!),
-                                end: Position(queryRange.end.shiftedColumn(by: $0.count + 1)!)
-                            ),
-                            newText: "),"
+                    TextEdit(
+                        range: LSPRange(
+                            start: Position(queryRange.start.shiftedColumn(by: -1)!),
+                            end: Position(queryRange.start.shiftedColumn(by: -1)!)
                         ),
-                        TextEdit(
-                            range: LSPRange(
-                                start: Position(queryRange.start.shiftedColumn(by: -1)!),
-                                end: Position(queryRange.start.shiftedColumn(by: -1)!)
-                            ),
-                            newText: ".target(name: "
-                        ),
-                    ]
-                )
-            }
+                        newText: ".target(name: "
+                    ),
+                ]
+            )
         }
-        completionItems.append(contentsOf: localPackagesTargets)
+        completionItems.append(contentsOf: localTargets)
 
         // Add external products
-        let externalProductItems: [CompletionItem] = resolvedPackages.externalPackages
+        let externalProductItems: [CompletionItem] = await resolvedDependenciesProvider.resolvedDependencies(for: document)
             .flatMap { package in
                 let packageName = package.displayName.lowercased() == package.identity.description
                     ? package.displayName
@@ -273,7 +266,7 @@ extension CompletionService {
         document: PackageSwiftDocument
     ) async throws -> CompletionResponse {
         logger.debug("Complete product name by query: '\(query)' for package: '\(package ?? "")'")
-        let externalPackages = await resolvedPackagesProvider.resolvedPackages(for: document).externalPackages
+        let externalPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
 
         if
             let package,
@@ -325,7 +318,7 @@ extension CompletionService {
         document: PackageSwiftDocument
     ) async throws -> CompletionResponse {
         logger.debug("Complete product package name by query: '\(query)' for product: '\(product ?? "")'")
-        let externalPackages = await resolvedPackagesProvider.resolvedPackages(for: document).externalPackages
+        let externalPackages = await resolvedDependenciesProvider.resolvedDependencies(for: document)
 
         let packages: [CompletionItemDTO] = externalPackages
             .filter {
@@ -362,19 +355,12 @@ extension CompletionService {
         document: PackageSwiftDocument,
     ) async throws -> CompletionResponse {
         logger.debug("Complete local target name by query: '\(query)'")
-        let localPackages = await resolvedPackagesProvider.resolvedPackages(for: document).localPackages
-
-        let targets: [CompletionItemDTO] = localPackages.flatMap { package in
-            let packageName = package.displayName.lowercased() == package.identity.description
-                ? package.displayName
-                : package.identity.description
-            return package.targets.map {
-                CompletionItemDTO(
-                    label: $0,
-                    insertRange: queryRange,
-                    documentation: "Local target (\(packageName))",
-                )
-            }
+        let targets: [CompletionItemDTO] = document.allItems().definedTargetsNames.map {
+            CompletionItemDTO(
+                label: $0,
+                insertRange: queryRange,
+                documentation: "Local target",
+            )
         }
 
         guard !query.isEmpty else {
@@ -464,5 +450,21 @@ private extension [CompletionItemDTO] {
                 ) }
             )
         )
+    }
+}
+
+private extension [PackageSwiftItem] {
+    var definedTargetsNames: [String] {
+        compactMap { packageSwiftItem -> String? in
+            if case let .targetDefinitionFunctionCall(arguments) = packageSwiftItem {
+                guard let argument = arguments.activeArgument() else {
+                    return nil
+                }
+                if case .name = argument.label {
+                    return argument.stringValue
+                }
+            }
+            return nil
+        }
     }
 }
