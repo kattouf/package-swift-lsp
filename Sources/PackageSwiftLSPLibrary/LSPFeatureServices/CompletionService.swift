@@ -457,11 +457,11 @@ private extension [PackageSwiftItem] {
     var definedTargetsNames: [String] {
         compactMap { packageSwiftItem -> String? in
             if case let .targetDefinitionFunctionCall(arguments) = packageSwiftItem {
-                guard let argument = arguments.activeArgument() else {
+                guard let nameArgument = arguments[.name] else {
                     return nil
                 }
-                if case .name = argument.label {
-                    return argument.stringValue
+                if case .name = nameArgument.label {
+                    return nameArgument.stringValue
                 }
             }
             return nil
