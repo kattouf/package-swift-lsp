@@ -48,16 +48,17 @@ final actor PackageSwiftDependenciesProvider {
         }
         let rootPackagePath = try AbsolutePath(validating: packageSwiftDocument.uri.replacingOccurrences(of: "file://", with: ""))
             .parentDirectory
-        guard let resolvedDependencies = try? await resolveDependencies(
-            rootPackagePath,
-            dependenciesCacheKey
-        ) else {
-            logger.error("Failed to resolve dependencies for \(packageSwiftDocument.uri)")
-            return
+        do {
+            let resolvedDependencies = try await resolveDependencies(
+                rootPackagePath,
+                dependenciesCacheKey
+            )
+            logger.debug("Resolved dependencies for \(packageSwiftDocument.uri): \(resolvedDependencies)")
+            resolvedDependenciesByDependenciesHashValue[dependenciesCacheKey] = resolvedDependencies
+            resolvedDependenciesByDocumentUri[packageSwiftDocument.uri] = resolvedDependencies
+        } catch {
+            logger.error("Failed to resolve dependencies for \(packageSwiftDocument.uri): \(error)")
         }
-        logger.debug("Resolved dependencies for \(packageSwiftDocument.uri): \(resolvedDependencies)")
-        resolvedDependenciesByDependenciesHashValue[dependenciesCacheKey] = resolvedDependencies
-        resolvedDependenciesByDocumentUri[packageSwiftDocument.uri] = resolvedDependencies
     }
 
     func resolvedDependencies(for packageSwiftDocument: PackageSwiftDocument) -> [ResolvedPackageInfo] {
