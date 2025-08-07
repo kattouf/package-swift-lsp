@@ -1,5 +1,8 @@
 import ConcurrencyExtras
 import Foundation
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
 
 struct GithubPackage: Sendable, Equatable {
     let url: String

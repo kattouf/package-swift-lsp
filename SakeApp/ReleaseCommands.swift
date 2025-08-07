@@ -32,13 +32,12 @@ struct ReleaseCommands {
     }
 
     private enum Constants {
-        static let swiftVersion = "6.0"
         static let buildArtifactsDirectory = ".build/artifacts"
         static let buildTargets: [BuildTarget] = [
             .init(arch: .arm, os: .macos),
             .init(arch: .x86, os: .macos),
-            // .init(arch: .x86, os: .linux),
-            // .init(arch: .arm, os: .linux),
+            .init(arch: .x86, os: .linux),
+            .init(arch: .arm, os: .linux),
         ]
         static let executableName = "package-swift-lsp"
     }
@@ -151,12 +150,13 @@ struct ReleaseCommands {
                             .joined(separator: " ")
                         if target.os == .linux {
                             let platform = target.arch == .arm ? "linux/arm64" : "linux/amd64"
-                            let dockerExec =
-                                "docker run --rm --volume \(context.projectRoot):/workdir --workdir /workdir --platform \(platform) swift:\(Constants.swiftVersion)"
+                            let imageName = "package-swift-lsp-builder-\(target.arch == .arm ? "arm64" : "amd64")"
+                            let dockerBuild = "docker build --platform \(platform) -t \(imageName) \(context.projectRoot)"
+                            let dockerRun = "docker run --rm --volume \(context.projectRoot):/workdir --workdir /workdir \(imageName)"
                             return (
-                                "\(dockerExec) swift build --static-swift-stdlib \(buildFlags)",
-                                "\(dockerExec) swift package clean",
-                                "\(dockerExec) strip -s",
+                                "\(dockerBuild) && \(dockerRun) swift build --static-swift-stdlib \(buildFlags)",
+                                "\(dockerBuild) && \(dockerRun) swift package clean",
+                                "\(dockerRun) strip -s",
                                 "zip -j"
                             )
                         } else {
