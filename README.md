@@ -1,6 +1,6 @@
 # Package.swift LSP
 
-![](https://img.shields.io/badge/Platform-macOS-6464aa)
+![](https://img.shields.io/badge/Platforms-macOS%20|%20Linux-6464aa)
 [![Latest Release](https://img.shields.io/github/release/kattouf/package-swift-lsp.svg)](https://github.com/kattouf/package-swift-lsp/releases/latest)
 [![codecov](https://codecov.io/gh/kattouf/package-swift-lsp/graph/badge.svg?token=ZV3UW5KJ6U)](https://codecov.io/gh/kattouf/package-swift-lsp)
 ![Build Status](https://github.com/kattouf/package-swift-lsp/actions/workflows/checks.yml/badge.svg?branch=main)
