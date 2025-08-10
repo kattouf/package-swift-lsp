@@ -38,20 +38,10 @@ Language server for Package.swift files that provides:
 The easiest way to get started is through editor extensions:
 
 - **[Zed](https://zed.dev/)**: Install the [Package.swift LSP extension](https://github.com/kattouf/package-swift-lsp-zed) from the Zed extension marketplace
-> [!NOTE]
-> For proper Swift language server functionality in non-Package.swift files, configure the language server order in your Zed settings:
-> ```json
-> {
->   "languages": {
->     "Swift": {
->       "language_servers": ["sourcekit-lsp", "package-swift-lsp"]
->     }
->   }
-> }
-> ```
 - **[Visual Studio Code](https://code.visualstudio.com/)**: Install the [Package.swift LSP extension](https://github.com/kattouf/package-swift-lsp-vscode) from the VSCode marketplace
+- **[Neovim](https://neovim.io/)**: Install the [Package.swift LSP plugin](https://github.com/kattouf/package-swift-lsp-neovim) using your preferred plugin manager
 
-Support for additional editors (Vim, Emacs, etc.) is planned. If you'd like to see support for your preferred editor, please submit a feature request or consider contributing!
+Support for additional editors is planned. If you'd like to see support for your preferred editor, please submit a feature request or consider contributing!
 
 The LSP server binary can also be downloaded directly from the [GitHub releases page](https://github.com/kattouf/package-swift-lsp/releases/latest).
 
