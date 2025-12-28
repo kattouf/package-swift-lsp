@@ -2,7 +2,7 @@ import Basics
 import ConcurrencyExtras
 import PackageGraph
 import PackageModel
-import Workspace
+@preconcurrency import Workspace
 
 struct ResolvedPackageInfo: Sendable, Equatable {
     let identity: String
@@ -48,7 +48,7 @@ final class PackageSwiftDependenciesResolver: Sendable {
             try? localFileSystem.removeFileTree(location.resolvedVersionsFile)
             throw StringError("Failed to resolve dependencies")
         }
-        let resolvedDependencies = workspace.state.dependencies.reduce(into: [PackageIdentity: Workspace.ManagedDependency]()) {
+        let resolvedDependencies = await workspace.state.dependencies.reduce(into: [PackageIdentity: Workspace.ManagedDependency]()) {
             $0[$1.packageRef.identity] = $1
         }
 
