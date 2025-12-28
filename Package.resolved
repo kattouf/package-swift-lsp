@@ -1,5 +1,5 @@
 {
-  "originHash" : "87245b195c6a44283f1b2fb2d886717a6bee13429dc3857c5c24da8a49971198",
+  "originHash" : "b615e8e60d42c96a1f7b4fc3466f43e6f5ebb154c8f2cbcd33fe9859b49627ba",
   "pins" : [
     {
       "identity" : "jsonrpc",
@@ -85,19 +85,19 @@
     {
       "identity" : "swift-driver",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-driver.git",
+      "location" : "https://github.com/swiftlang/swift-driver.git",
       "state" : {
-        "branch" : "release/6.1",
-        "revision" : "20cd624311cb835f7a61c0103404fc191d392a38"
+        "branch" : "release/6.2",
+        "revision" : "aedacc6c1583db4f2989a367e3c41968558a5b8e"
       }
     },
     {
       "identity" : "swift-llbuild",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-llbuild.git",
+      "location" : "https://github.com/swiftlang/swift-llbuild.git",
       "state" : {
-        "branch" : "release/6.1",
-        "revision" : "4fc005bfb0849f17e6a79ad02ba27f4f539ca6b9"
+        "branch" : "release/6.2",
+        "revision" : "073dff55529d7c4ecbd615ab5f5ac52ae5b380da"
       }
     },
     {
@@ -114,7 +114,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-package-manager",
       "state" : {
-        "revision" : "1fc90e29029bfeafe3550ccf08f74a86a11baa23"
+        "revision" : "3cf1cb66ebde00dab737dcebad96218e2017530d"
       }
     },
     {
@@ -122,8 +122,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-subprocess.git",
       "state" : {
-        "branch" : "0.2.1",
-        "revision" : "44922dfe46380cd354ca4b0208e717a3e92b13dd"
+        "revision" : "44922dfe46380cd354ca4b0208e717a3e92b13dd",
+        "version" : "0.2.1"
       }
     },
     {
@@ -131,8 +131,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax.git",
       "state" : {
-        "branch" : "release/6.1",
-        "revision" : "cbd0366a54a9f8fdaa33834652fb2e80f2948573"
+        "branch" : "release/6.2",
+        "revision" : "5a87516fc3dddbd23cb76358eb489915ee86b444"
       }
     },
     {
@@ -156,19 +156,10 @@
     {
       "identity" : "swift-tools-support-core",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-tools-support-core.git",
+      "location" : "https://github.com/swiftlang/swift-tools-support-core.git",
       "state" : {
-        "branch" : "release/6.1",
-        "revision" : "5cd61a77866b110bb222c38073627d2703c750e6"
-      }
-    },
-    {
-      "identity" : "yams",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/jpsim/Yams.git",
-      "state" : {
-        "revision" : "0d9ee7ea8c4ebd4a489ad7a73d5c6cad55d6fed3",
-        "version" : "5.0.6"
+        "branch" : "release/6.2",
+        "revision" : "5a993c8848487c934d53ffceef8e1cad0a241dc1"
       }
     }
   ],
