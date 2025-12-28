@@ -30,11 +30,12 @@ actor GitRefsProvider {
         case .branches:
             "--heads"
         }
+
         let result = try await run(
             .name("git"),
             arguments: ["ls-remote", refsArg, repositoryURL],
-            output: .string(limit: 512 * 1024, encoding: UTF8.self),
-            error: .string
+            output: .string(limit: 512 * 1024),
+            error: .string(limit: 512 * 1024)
         )
         guard let stdout = result.standardOutput, result.terminationStatus == .exited(0) else {
             throw GitError.gitLsRemoteFailure(stdout: result.standardOutput, stderr: result.standardError)

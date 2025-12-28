@@ -17,7 +17,7 @@ let package = Package(
         .package(url: "https://github.com/ChimeHQ/LanguageServer", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "510.0.1"),
         .package(url: "https://github.com/swiftlang/swift-package-manager", revision: "1fc90e29029bfeafe3550ccf08f74a86a11baa23"),
-        .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "0.2.1"),
         .package(url: "https://github.com/pointfreeco/swift-concurrency-extras.git", from: "1.3.1"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.6.3"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
