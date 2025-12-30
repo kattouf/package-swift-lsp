@@ -1,4 +1,4 @@
-FROM swift:6.1
+FROM swift:6.2
 
 # Install only SQLite development headers - Swift already has build tools
 RUN apt-get update && \
