@@ -10,20 +10,24 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   build-and-test:
-    runs-on: macOS-15
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_16.3.app
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: 6.2
       - uses: kattouf/setup-sake@v1
       - name: Run tests
         run: sake test
   lint:
-    runs-on: macOS-15
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_16.3.app
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: 6.2
       - uses: kattouf/setup-sake@v1
       - name: Run lint
         run: sake lint
