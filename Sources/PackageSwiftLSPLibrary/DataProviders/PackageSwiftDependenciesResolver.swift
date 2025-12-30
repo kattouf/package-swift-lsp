@@ -54,8 +54,13 @@ final class PackageSwiftDependenciesResolver: Sendable {
 
         var packagesInfo: [ResolvedPackageInfo] = []
 
+        let rootPackagesDirectDependencies = Set(packageGraph.rootPackages.flatMap(\.dependencies))
         for package in packageGraph.packages {
             let identity = package.identity
+
+            guard rootPackagesDirectDependencies.contains(identity) else {
+                continue
+            }
 
             guard let resolvedDependency = resolvedDependencies[identity] else {
                 continue
